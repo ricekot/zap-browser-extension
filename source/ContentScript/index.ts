@@ -251,6 +251,27 @@ function enableExtension(): void {
   reportPageLoaded(document, reportObject);
 }
 
+function applyClickListenerMonkeyPatch(): void {
+  console.log('Applying click listener monkey patch');
+  const originalAddEventListener = EventTarget.prototype.addEventListener;
+  // eslint-disable-next-line func-names
+  EventTarget.prototype.addEventListener = function (
+    type: string,
+    listener: EventListenerOrEventListenerObject,
+    options?: boolean | AddEventListenerOptions
+  ): void {
+    console.log('Event listener added:', {
+      type,
+      listener,
+      element: this,
+    });
+    reportEvent(new ReportedEvent(`Event Listener Added`));
+    const element = this as Element;
+    reportNodeElements(element, element.tagName, reportObject);
+    originalAddEventListener.call(this, type, listener, options);
+  };
+}
+
 function configureExtension(): void {
   if (isConfigurationRequest()) {
     // The Browser has been launched from ZAP - use this URL for configuration
@@ -292,6 +313,7 @@ function injectScript(): Promise<boolean> {
   });
 }
 
+applyClickListenerMonkeyPatch();
 injectScript();
 
 /* eslint-disable  @typescript-eslint/no-explicit-any */
