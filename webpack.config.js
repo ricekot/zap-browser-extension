@@ -184,7 +184,7 @@ module.exports = {
   ],
 
   optimization: {
-    minimize: true,
+    minimize: nodeEnv === 'production',
     minimizer: [
       new TerserPlugin({
         parallel: true,

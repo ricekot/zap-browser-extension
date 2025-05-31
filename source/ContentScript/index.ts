@@ -162,6 +162,19 @@ function reportPageLinks(
   );
 }
 
+function reportCursorPointerElements(
+  doc: Document,
+  fn: (re: ReportedObject) => void
+): void {
+  const url = window.location.href;
+  const collection = doc.querySelectorAll('*');
+  Array.prototype.forEach.call(collection, (element: Element) => {
+    if (getComputedStyle(element).cursor === 'pointer') {
+      fn(new ReportedElement(element, url));
+    }
+  });
+}
+
 function reportElements(
   collection: HTMLCollection,
   fn: (re: ReportedObject) => void
@@ -192,6 +205,7 @@ function reportPageLoaded(
   });
 
   reportPageLinks(doc, fn);
+  reportCursorPointerElements(doc, fn);
   reportPageForms(doc, fn);
   reportElements(doc.getElementsByTagName('input'), fn);
   reportElements(doc.getElementsByTagName('button'), fn);
@@ -206,6 +220,7 @@ const domMutated = function domMutation(
   withZapEnableSetting(() => {
     reportEvent(new ReportedEvent('domMutation'));
     reportPageLinks(document, reportObject);
+    reportCursorPointerElements(document, reportObject);
     reportPageForms(document, reportObject);
     for (const mutation of mutationList) {
       if (mutation.type === 'childList') {
@@ -315,6 +330,7 @@ Browser.runtime.onMessage.addListener(
 
 export {
   reportPageLinks,
+  reportCursorPointerElements,
   reportPageLoaded,
   reportPageForms,
   reportNodeElements,
